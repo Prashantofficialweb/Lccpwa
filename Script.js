@@ -3,8 +3,8 @@
         // PRE-SAVED ADMIN CREDENTIALS
         // ============================================
         const ADMIN_CREDENTIALS = {
-            email: "admin@123.com",
-            password: "admin@123"
+            email: "admin@lcc.com",
+            password: "goludon"
         };
 
         // Session duration: 24 hours in milliseconds
@@ -13,7 +13,7 @@
         // ============================================
         // REDIRECT URL - ADD YOUR LINK HERE
         // ============================================
-        const REDIRECT_URL = "https:google.com";
+        const REDIRECT_URL = "https://laxmi-coaching.blogspot.com/p/admin.html";
 
         // ============================================
         // DOM ELEMENTS
