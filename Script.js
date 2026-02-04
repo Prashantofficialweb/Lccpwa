@@ -13,7 +13,7 @@
         // ============================================
         // REDIRECT URL - ADD YOUR LINK HERE
         // ============================================
-        const REDIRECT_URL = "https://your-admin-panel-link.com";
+        const REDIRECT_URL = "https:google.com";
 
         // ============================================
         // DOM ELEMENTS
