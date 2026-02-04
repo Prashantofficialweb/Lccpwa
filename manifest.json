@@ -1,21 +1,24 @@
 {
   "name": "Laxmi Coaching Center",
   "short_name": "LCCAPP",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
   "description": "Lcc Institute Focus on great future of Student by providing affordable price education.",
+  "start_url": "https://laxmi-coaching.blogspot.com/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjjizxrJfdjMZeVFH09fjcBEn5BEjr-Vew1bgxH5usn-o_FQdiE4QAiKCl0kGasP7HIw9mGxUdj2rPIrznEvJwlhFL4JVtOU1-djcYO07pXTAYcYR96jtpdgWkSr_JVWqRIV9_nMlWY-AQ2YcQM-yt3YjumQR49CuVV8OGQJBAWeXCT5vkZCH_u1lKwrkM/s192/6854.jpg",
       "sizes": "192x192",
-      "type": "image/jpg"
+      "type": "image/jpg",
+      "purpose": "any maskable"
     },
     {
       "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiH4rO5ub4eQxZ5KEZ6ja2dhI687TkK6F57E6PNYH_ct5pyXwdFA3J3MfRM5Do23oZyf0HjoOgMtyIJxGFrf8tTvbw-Ztv8P6f-iGvbyE_Ovles-1_rKtPw49hB7QYXKKG_2mS9zp6-6s9gStRwxE4wU9OG5qRCt35U4scdqqqr5JS8bYBveS8AETKazxg/s512/6855.jpg",
       "sizes": "512x512",
-      "type": "image/jpg"
+      "type": "image/jpg",
+      "purpose": "any maskable"
     }
   ]
 }
