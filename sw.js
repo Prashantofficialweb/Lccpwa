@@ -1,124 +1,85 @@
-const CACHE_NAME = 'my-blog-pwa-v1';
+importScripts('https://cdn.onesignal.com/sdks/OneSignalSDKWorker.js');
 
-// ⚠️ CHANGE THIS: Add your Blogger URL here
+const CACHE_NAME = 'lcc-pwa-v2'; // Incremented version
 const BLOGGER_URL = 'https://laxmi-coaching.blogspot.com';
 
-// Files to cache - Update with your actual URLs
-const urlsToCache = [
+// Assets that should be available offline immediately
+const STATIC_ASSETS = [
   BLOGGER_URL + '/',
-  BLOGGER_URL + '/?m=1'  // Mobile version
+  BLOGGER_URL + '/?m=1',
+  'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap'
 ];
 
-// Install event - cache essential files
+// Install Event
 self.addEventListener('install', event => {
-  console.log('Service Worker: Installing...');
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caching files');
-        // Use addAll with catch to handle failures gracefully
-        return cache.addAll(urlsToCache).catch(err => {
-          console.log('Cache addAll failed:', err);
-        });
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
 });
 
-// Activate event - clean up old caches
+// Activate Event - Clean up old caches
 self.addEventListener('activate', event => {
-  console.log('Service Worker: Activated');
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Clearing old cache');
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    ))
   );
   return self.clients.claim();
 });
 
-// Fetch event - Network first, fallback to cache
+// Intelligent Fetch Strategy
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
-  
-  // Skip chrome-extension and other non-http(s) requests
-  if (!event.request.url.startsWith('http')) return;
-  
-  // Skip Blogger admin URLs
-  if (event.request.url.includes('/b/')) return;
-  if (event.request.url.includes('blogger.com')) return;
-  if (event.request.url.includes('google.com/blogger')) return;
+  const url = new URL(event.request.url);
 
+  // 1. Skip non-GET and Admin pages
+  if (event.request.method !== 'GET' || url.href.includes('blogger.com') || url.href.includes('/b/')) {
+    return;
+  }
+
+  // 2. Strategy: Stale-While-Revalidate for Images and Scripts
+  // This makes the app feel very fast because it shows cached items instantly.
+  if (event.request.destination === 'image' || event.request.destination === 'script' || event.request.destination === 'style') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchedResponse = fetch(event.request).then(networkResponse => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+          return cachedResponse || fetchedResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. Strategy: Network First, Fallback to Cache for HTML/Pages
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Clone the response before caching
-        const responseClone = response.clone();
-        
-        // Only cache successful responses from your domain
-        if (response.status === 200 && response.type === 'basic') {
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseClone);
-            });
+        if (response.status === 200) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
-        
         return response;
       })
       .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            
-            // Return cached homepage for navigation requests (offline)
-            if (event.request.mode === 'navigate') {
-              return caches.match(BLOGGER_URL + '/');
-            }
-            
-            // Return offline response
-            return new Response('You are offline', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
-          });
+        return caches.match(event.request).then(match => {
+          if (match) return match;
+          if (event.request.mode === 'navigate') return caches.match(BLOGGER_URL + '/');
+          
+          // Professional Offline Response
+          return new Response(
+            `<html><body style="font-family:sans-serif;text-align:center;padding:50px;">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjeUqJ98ZmYOGoBx3QQ0cCMShQqv1HTjy93CjT0KKMj1UED1i6NK1hAwRVnWVmQwN2pyri_sG2Z490I8CzRy_4Ov2M16iVUdBO0lqROXhA0DDkIlI1lDnWdTzasUcgC1v0DpUimyE4NH2FAHq4q9ZOWbaPCR26FNUM_ZuFbq6X2WTX8CdYTWb1EFMJdD4Uu/s192/9550.png" width="100">
+            <h2>You are currently offline</h2>
+            <p>Please check your internet connection and try again.</p>
+            <button onclick="window.location.reload()" style="background:#21a03e;color:white;padding:10px 20px;border:none;border-radius:5px;">Retry</button>
+            </body></html>`,
+            { headers: { 'Content-Type': 'text/html' } }
+          );
+        });
       })
-  );
-});
-
-// Handle push notifications (optional - for future use)
-self.addEventListener('push', event => {
-  const options = {
-    body: event.data ? event.data.text() : 'New post available!',
-    icon: 'https://laxmi-coaching.blogspot.com/favicon.ico', // ⚠️ CHANGE THIS
-    badge: 'https://laxmi-coaching.blogspot.com/favicon.ico', // ⚠️ CHANGE THIS
-    vibrate: [100, 50, 100],
-    data: {
-      url: BLOGGER_URL
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification('Blog Update', options)
-  );
-});
-
-// Handle notification click - opens your blog
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow(BLOGGER_URL)
   );
 });
