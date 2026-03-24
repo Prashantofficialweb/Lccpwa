@@ -1,4 +1,4 @@
-importScripts('https://cdn.onesignal.com/sdks/OneSignalSDKWorker.js');
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 const CACHE_NAME = 'lcc-pwa-v2'; // Incremented version
 const BLOGGER_URL = 'https://laxmi-coaching.blogspot.com';
