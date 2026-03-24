@@ -4,8 +4,8 @@
   "description": "Lcc Institute Focus on great future of Student by providing affordable price education.",
   "start_url": "https://laxmi-coaching.blogspot.com/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#667eea",
+  "background_color": "#87f59b",
+  "theme_color": "#87f59b",
   "orientation": "portrait-primary",
   "icons": [
     {
